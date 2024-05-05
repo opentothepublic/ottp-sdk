@@ -1,6 +1,14 @@
 import axios from 'axios'
-import { createPublicClient, http, parseAbiItem } from 'viem'
+import { createPublicClient, encodeFunctionData, getContract, http, parseAbiItem } from 'viem'
 import { base } from 'viem/chains'
+import { Db, MongoClient } from "mongodb"
+import dotenv from "dotenv"
+import { abi } from './abi'
+import { EAS, SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
+import { easAbi } from './easAbi'
+import { createWalletClient, custom } from 'viem'
+
+
 
 const fetchGqlApi = async (query: string, variables?: object): Promise<any> => {
     const url = 'https://base.easscan.org/graphql'
@@ -107,4 +115,112 @@ const parseData = async () => {
     }
 }
 
-export {fetchGqlApi, getOid, parseData, fetchAttestations}
+dotenv.config()
+
+interface AttestData {
+    "toFID": string,
+    "message": string,
+    "project": string[]
+}
+
+interface AttestationsData {
+    "id": string,
+    "attester": string,
+    "revocable": boolean,
+    "time": number,        
+    "revoked": boolean,
+    "revocationTime": number,
+    "schemaId": string,
+    "txid": string,
+    "decodedAttestData": AttestData    
+}
+
+const url = process.env.MONGO!
+
+const client = new MongoClient(url)
+
+const fetchBy = async(parameter: string, value: string) => {
+    try {
+        await client.connect()
+        const db: Db = client.db(process.env.DB)
+        const collection = db.collection(process.env.COLLECTION!)
+        const query = {[parameter]: value}
+        const documents = await collection.find(query).toArray()
+        return documents
+    } catch (e) { 
+        console.error(e)
+    }   
+}
+
+const getEthAddresses = async(fid: number) => {
+    const options = {
+        method: 'GET',
+        url: `https://api.neynar.com/v2/farcaster/user/bulk?fids=${fid.toString()}&viewer_fid=3`,
+        headers: {accept: 'application/json', api_key: process.env.NEYNAR_API_KEY}
+    }
+    try {
+        const response = await axios.request(options)
+        console.log(response.data)  
+        return response.data?.users[0].verified_addresses.eth_addresses
+
+    } catch (e) {
+        console.error(e)
+    }
+    
+}
+
+const getOidFromContract = async (fid: number) => {
+    try {
+        const oid = await publicClient.readContract({
+            address: '0x9D3eD1452A5811e2a4653A9c8029d81Ca99b817f',
+            abi: abi,
+            functionName: 'getOid',
+            args: [fid]
+          })
+                
+        console.log("OID:", Number(oid))
+        return Number(oid)
+    } catch (e) {
+        console.error(e)
+    }    
+}
+
+const createAttestation = async (fromFid: number, data: string) => {
+
+    const client = createWalletClient({
+        chain: base,
+        transport: custom(window.ethereum!)
+    })
+    const [address] = await client.getAddresses() 
+    const schemaEncoder = new SchemaEncoder("uint256 fromFID,string data")
+    const encodedData = schemaEncoder.encodeData([
+	    { name: "fromFID", value: fromFid, type: "uint256" },
+	    { name: "data", value: JSON.stringify(data), type: "string" }	        
+    ])
+    console.log(encodedData)
+      
+    const functionData = {
+        schema: '0x8b3daa42a5d5a0957751f262a32f42a01e6def0b9ef91fdec889945ff13e5d67',
+        data: {
+            recipient: "0x0000000000000000000000000000000000000000",
+            expirationTime: 0,
+            revocable: true,
+            refUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
+            data: encodedData,
+            value: 0,
+        }
+    }
+
+    const tx = await client.writeContract({
+        address: '0x4200000000000000000000000000000000000021',
+        abi: easAbi,
+        functionName: 'attest',
+        account: address,
+        args: [functionData]
+    })
+
+    console.log(tx)
+    
+}
+
+export {fetchGqlApi, getOid, parseData, fetchAttestations, fetchBy, getEthAddresses, getOidFromContract, createAttestation}

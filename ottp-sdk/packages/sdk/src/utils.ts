@@ -1,6 +1,9 @@
 import axios from "axios"
-import { createPublicClient, http } from 'viem'
+import { AxiosResponse } from 'axios'
+import { createPublicClient, http, getContract } from 'viem'
 import { base } from 'viem/chains'
+import { AttestationDocument } from "./interface"
+import { abi } from "./contracts/OIDRegistryProxyAbi"
 
 const getFnameFromFid = async (fid: number): Promise<string> => { 
     if (!fid) 
@@ -134,4 +137,42 @@ const fetchGqlApi = async (query: string, variables?: object): Promise<any> => {
     }
 }
 
-export {getFids, validateCollabUserInput, getTaggedData, getNewAttestId, fetchGqlApi}
+const getEthAddresses = async (fid: string): Promise<string[]> => {
+    try {
+        const res = await axios.get(`http://localhost:3000/api/eth_addresses?fid=${fid}`)
+        return res.data?.data
+    } catch (e) {
+        console.error(e)
+        return []
+    }
+}
+
+const getAttestations = async (addr: string): Promise<AttestationDocument[]> => {
+    try {
+        const res = await axios.get(`http://localhost:3000/api/attestations?attester=${addr}`)
+        return res.data?.data
+    } catch (e) {
+        console.error(e)
+        return []
+    }
+}
+
+const getOid = async (fid: number) => {
+    try {
+        const oid = await publicClient.readContract({
+            address: '0x9D3eD1452A5811e2a4653A9c8029d81Ca99b817f',
+            abi: abi,
+            functionName: 'getOid',
+            args: [fid]
+          })
+                
+        console.log("OID:", Number(oid))
+        return Number(oid)
+    } catch (e) {
+        console.error(e)
+    }    
+}
+
+
+
+export {getFids, validateCollabUserInput, getTaggedData, getNewAttestId, getAttestations, getEthAddresses, getOid}
