@@ -38,3 +38,6 @@ yarn-error.log*
 *.pem
 
 package-lock.json
+tests/
+*.tgz
+.vscode

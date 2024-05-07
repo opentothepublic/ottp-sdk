@@ -1,18 +1,21 @@
 {
-  "name": "sdk",
-  "version": "1.0.0",
+  "name": "@ottp/sdk",
+  "version": "1.0.1",
   "description": "Software Dev Kit for OTTP",
-  "main": "dist/index.ts",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "tsc -p . && ts-node src/test.ts",
+    "build": "tsc -p ."
   },
-  "author": "",
+  "author": "Krish",
   "license": "ISC",
   "devDependencies": {
     "ts-node": "^10.9.2",
+    "tsup": "^8.0.2",
     "typescript": "^5.4.5"
   },
   "dependencies": {
+    "@ethereum-attestation-service/eas-sdk": "^2.1.4",
     "axios": "^1.6.8",
     "mongodb": "^6.6.0",
     "viem": "^2.9.19"

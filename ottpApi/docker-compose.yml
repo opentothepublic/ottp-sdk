@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  app:
+    image: ottpapi
+    build:
+      context: ./
+      target: dev
+      dockerfile: Dockerfile
+    volumes:
+        - .:/app
+        - /app/node_modules
+    ports:
+      - "3000:3000"

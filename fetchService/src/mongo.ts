@@ -4,7 +4,6 @@ import { AttestationsData } from "./utils"
 dotenv.config()
 
 const url = process.env.MONGO!
-const dbName = process.env.DB
 
 const client = new MongoClient(url)
 

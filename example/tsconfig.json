@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es2016",
-    "module": "commonjs",
+    "target": "ESNext",
+    "module": "ESNext",
+    "lib": ["ESNext", "DOM"],
     "strict": true,
     "skipLibCheck": true,
     "removeComments": true,
@@ -9,10 +10,7 @@
     "moduleResolution": "node",
     "useUnknownInCatchVariables": false,
     "forceConsistentCasingInFileNames": true,
-    "declaration": true,
-    "rootDir": "./src",
-    "outDir": "./dist/"
   },
-  "include": ["./src/**/*"],
+  "include": ["../test/src/**/*"],
   "exclude": ["node_modules"]
 }

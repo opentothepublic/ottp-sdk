@@ -1,7 +1,5 @@
 import axios from 'axios'
 import { readFileSync, writeFileSync } from 'fs'
-import util from 'util'
-import { insertRecords } from './mongo'
 
 const fetchGqlApi = async (query: string, variables?: object): Promise<any> => {
     const url = 'https://base.easscan.org/graphql'
@@ -115,7 +113,7 @@ const sendAttestations = async (): Promise<AttestationsData[]|null> => {
         let attestationData: AttestationsData[] = []    
         const modAttestationData = attestations.map(attestation => ({
             id: attestation.id,
-            attester: attestation.attester,                
+            attester: attestation.attester.toLowerCase(),                
             revocable: attestation.revocable,
             time: attestation.time,      
             revoked: attestation.revoked,
@@ -125,15 +123,15 @@ const sendAttestations = async (): Promise<AttestationsData[]|null> => {
             decodedAttestData: parseData(attestation.decodedDataJson)!
         }))
         attestationData = modAttestationData
-        console.log(util.inspect(attestationData, {depth: null}))
+        //console.log(util.inspect(attestationData, {depth: null}))
+        //console.log(modAttestationData)
         return attestationData
     } else return null
 }
 
 
 const parseData = (jsonString: string): AttestData | null => {
-    //const jsonString = "[{\"name\":\"fromFID\",\"type\":\"uint256\",\"signature\":\"uint256 fromFID\",\"value\":{\"name\":\"fromFID\",\"type\":\"uint256\",\"value\":{\"type\":\"BigNumber\",\"hex\":\"0x1a82\"}}},{\"name\":\"data\",\"type\":\"string\",\"signature\":\"string data\",\"value\":{\"name\":\"data\",\"type\":\"string\",\"value\":\"{\\\"toFID\\\":\\\"5848\\\",\\\"message\\\":\\\"Facilitated a 4-week co-learning experience on \\\\\\\"Systems Transformation\\\\\\\" for @superbenefit and /ccs . Website: https://web3hatchery.my.canva.site/systems-transformation\\\",\\\"project\\\":[\\\"superbenefit\\\"]}\"}}]";
-    
+        
     try {
         const jsonData = JSON.parse(jsonString);        
         const attestData: AttestData = JSON.parse(jsonData[1].value.value)

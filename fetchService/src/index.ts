@@ -1,4 +1,4 @@
-import { parseData, AttestationsData, sendAttestations} from "./utils"
+import { sendAttestations} from "./utils"
 import { insertRecords } from "./mongo"
 
 
@@ -11,15 +11,10 @@ const getAttestations = async () => {
 }
 
 const main = async (intervalMinutes: number) => {
-   // const attestData = await fetchAttestations()
-    //console.log(attestData.attestations)
-    //if (attestData) console.log(`Fetched ${attestData.attestations.length} attestations @ ${Date.now()}`)
-    //console.log(await getOid('0x4d11740513ab4729dc298383253d4c9ca98f66fdcc6896d793befac6db5ce7de' as `0x{string}`))
-    //parseData()
     await getAttestations()    
     setInterval(async () => {
         await getAttestations()
     }, intervalMinutes * 60 * 1000)
 }
 
-main(2)
+main(5)

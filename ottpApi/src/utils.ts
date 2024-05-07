@@ -32,7 +32,7 @@ const fetchBy = async(attester: string): Promise<WithId<AttestationDocument>[] |
         await client.connect()
         const db: Db = client.db(process.env.DB)
         const collection = db.collection<AttestationDocument>(process.env.COLLECTION!)
-        const query = {attester: attester}
+        const query = {attester: attester.toLowerCase()}
         const documents = await collection.find(query).toArray()
         return documents
     } catch (e) { 

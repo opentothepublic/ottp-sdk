@@ -1,13 +1,8 @@
-import { AttestationDocument, OttpClientConfiguration } from "./interface";
-import { getAttestations, getEthAddresses, getOid } from "./utils";
+import { AttestationDocument } from "./interface";
+import { createAttestation, getAttestations, getEthAddresses, getOid } from "./utils";
 
 export class OttpClient {
-    private readonly configuration: OttpClientConfiguration;
-
-    constructor(configuration: OttpClientConfiguration) {
-        this.configuration = configuration;        
-    }
-    
+       
     getOttpAttestations = async (fid: string): Promise<AttestationDocument[] | null> => {
         let attestations: AttestationDocument[] = [] 
         const addrs = await getEthAddresses(fid)
@@ -20,16 +15,19 @@ export class OttpClient {
                 attestations = attestations.concat(attestData)
             }
         }
-        console.log(attestations)
+        //console.log(attestations)
         return attestations
     }
 
-    createOttpAttestation = async () => {}
+    createOttpAttestation = async (account: any, fromFid: number, data: string): Promise<`0x${string}`> => {
+        const tx = await createAttestation(account, fromFid, data)
+        return tx
+    }
 
-    getCollaborators = async () => {}
+    getCollaborators = async (): Promise<void> => {}
 
-    getOttpId = async (fid: number) => {
-        const oid = await getOid(fid)
+    getOttpId = async (fid: number): Promise<number|null> => {
+        const oid = await getOid(fid)!
         return oid
     }
 }
