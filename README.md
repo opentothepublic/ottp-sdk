@@ -45,4 +45,4 @@ main()
 ```
 #### Create Attestation
 
-Refer the example repo.
+Refer the [example](https://github.com/ronykris/ottpsdk/tree/main/example) repo.
