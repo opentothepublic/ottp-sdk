@@ -1,6 +1,6 @@
 import express from "express"
 import cors from 'cors'
-import { fetchBy, getEthAddresses } from "./utils"
+import { fetchBy, getAttestations, getEthAddresses } from "./utils"
 
 const app = express()
 app.use(cors())
@@ -29,6 +29,11 @@ app.get("/api/eth_addresses", async (req, res) => {
     const addrs = await getEthAddresses(fid.toString())
     console.log(`Returned ${addrs?.length} addresses`)
     res.send({ status: 'OK', data: addrs});
+})
+
+app.get("/api/fetch", async (req, res) => {
+    await getAttestations()
+    return res.send({ status: 'OK' })
 })
 
 app.listen(port, () => console.log(`App running on port ${port}...`))
