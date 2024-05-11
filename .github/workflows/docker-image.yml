@@ -22,6 +22,7 @@ jobs:
       uses: google-github-actions/auth@v2      
       with:
         project_id: 'ecomscraper'
+        service_account: 'github-actions@ecomscraper.iam.gserviceaccount.com'  
         workload_identity_provider: 'projects/686267651726/locations/global/workloadIdentityPools/pool1/providers/aws1'
                
           
