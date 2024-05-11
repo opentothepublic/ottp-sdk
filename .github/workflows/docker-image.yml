@@ -15,12 +15,11 @@ jobs:
 
     - id: auth
       name: Authenticate with Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v2      
       with:
-        token_format: access_token
-        workload_identity_provider: aws1
-        service_account: github-actions@ecomscraper.iam.gserviceaccount.com
-        access_token_lifetime: 300s
+        project_id: 'ecomscraper'
+        workload_identity_provider: 'projects/686267651726/locations/global/workloadIdentityPools/pool1/providers/aws1'
+               
           
     - name: Build the Docker image
       run: |-
