@@ -72,6 +72,8 @@ const getLastFetched = () : number | null => {
 
 const saveLastFetched = (time: number) => {
     writeFileSync('src/lastFetched.txt', time.toString(), 'utf8');
+    const newLastFetched = getLastFetched()
+    console.log('New last fetched: ', newLastFetched)
 }
 
 const fetchAttestations = async (): Promise<Attestations[] | null> => {
@@ -91,6 +93,7 @@ const fetchAttestations = async (): Promise<Attestations[] | null> => {
     }`
 
     let lastFetched = getLastFetched()
+    console.log('Last fetched: ',lastFetched)
 
     const variable1 = {
         "where": {
@@ -144,12 +147,19 @@ const sendAttestations = async (): Promise<AttestationsData[]|null> => {
 }
 
 
-const parseData = (jsonString: string): AttestData | null => {
-        
+const parseData = (jsonString: string): AttestData | null => {      
     try {
         const jsonData = JSON.parse(jsonString);        
-        const attestData: AttestData = JSON.parse(jsonData[1].value.value)
-        //console.log(attestData)
+        var attestData: AttestData = {
+            fromFID: "",
+            toFID: "",
+            message: "",
+            project: []
+        }
+        attestData.fromFID = parseInt(jsonData[0].value.value.hex, 16).toString()
+        var partAttestData = JSON.parse(jsonData[1].value.value)
+        attestData = { ...attestData , ...partAttestData}
+        console.log(attestData)
         return attestData;
     } catch (error) {
         console.error('Failed to parse JSON string:', error)

@@ -1,4 +1,4 @@
-import { AttestationDocument } from "./interface";
+import { AttestationDocument,  } from "./interface";
 import { createAttestation, getAttestations, getEthAddresses, getOid } from "./utils";
 
 export class OttpClient {
