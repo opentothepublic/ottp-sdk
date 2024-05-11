@@ -14,12 +14,12 @@ jobs:
 
       - name: Set up Google Cloud SDK
         run: |
-          curl -o google-cloud-sdk.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-372.0.0-linux-x86_64.tar.gz
-          tar -xf google-cloud-sdk.tar.gz
-          ./google-cloud-sdk/install.sh --quiet
+          curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
+          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+          sudo apt-get install google-cloud-cli -y
           echo "${{ secrets.GCLOUD_AUTH }}" > /tmp/gcloud.json
-          ./google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=/tmp/gcloud.json
-          ./google-cloud-sdk/bin/gcloud config set project ecomScraper
+          gcloud auth activate-service-account --key-file=/tmp/gcloud.json
+          gcloud config set project ecomScraper
 
       - name: Build Docker image
         run: |-
