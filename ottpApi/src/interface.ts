@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 
 interface AttestData {
+    "fromFID": string,
     "toFID": string,
     "message": string,
     "project": string[]

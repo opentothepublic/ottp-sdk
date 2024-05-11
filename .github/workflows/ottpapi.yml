@@ -1,0 +1,40 @@
+name: ottpapi-cicd
+
+on: 
+  push:
+    paths:
+      - ottpApi/**
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Google Cloud SDK
+        run: |
+          curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
+          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+          sudo apt-get install google-cloud-cli -y
+          echo "${{ secrets.GCLOUD_AUTH }}" > /tmp/gcloud.json
+          gcloud auth activate-service-account --key-file=/tmp/gcloud.json
+          gcloud config set project ecomScraper
+
+      - name: Build Docker image
+        run: |-
+          docker build -t ottpapi .
+
+      - name: Push Docker image to GCR (replace with your image name)
+        run: |-
+          ./google-cloud-sdk/bin/gcloud auth configure-docker
+          docker tag asia-south1-docker.pkg.dev/ecomscraper/images/ottpapi:latest
+          docker push asia-south1-docker.pkg.dev/ecomscraper/images/ottpapi:latest
+
+      - name: Deploy to Cloud Run (replace with your service name)
+        run: |
+          ./google-cloud-sdk/bin/gcloud run deploy \
+            --image=asia-south1-docker.pkg.dev/ecomscraper/images/ottpapi:latest \
+            --platform=managed \
+            --region=asia-south1 \
+            --allow-unauthenticated
