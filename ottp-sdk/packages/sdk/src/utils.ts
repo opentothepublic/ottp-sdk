@@ -201,22 +201,26 @@ const getCollabs = async(fid: string, documents: AttestationDocument[]): Promise
     documents.map(document => {
         if (document.decodedAttestData.fromFID === fid) {
             const collab1 = document.decodedAttestData.toFID.split(',').filter(id => id.trim() !== fid && id.trim() !== '') 
-            collabs = [...collabs, ...collab1]
-            //console.log(collabs)       
+            collabs = [...collabs, ...collab1]     
         } else {
             let collab2 = [document.decodedAttestData.fromFID]
             const collab3 = document.decodedAttestData.toFID.split(',').filter(id => id.trim() !== fid  && id.trim() !== '')
             collabs = [...collabs, ...collab2, ...collab3]
-            //console.log(collabs) 
         }        
     })
-    //console.log('Final collab array: ', collabs)
-    //console.log(collabs.length)
     const collaborators: string[] = Array.from(new Set(collabs))
-    //console.log(collaborators)
-    //console.log(collaborators.length)
     return collaborators 
 }
 
+const getAttestationsByFid = async (fid: string): Promise<AttestationDocument[]> => {
+    try {
+        const res = await axios.get(`https://ottpapi-6k6gsdlfoa-el.a.run.app/api/fetchbyfid?fid=${fid}`)
+        return res.data?.data
+    } catch (e) {
+        console.error(e)
+        return []
+    }
+}
 
-export {getFids, validateCollabUserInput, getTaggedData, getNewAttestId, getAttestations, getEthAddresses, getOid, createAttestation}
+
+export {getFids, validateCollabUserInput, getTaggedData, getNewAttestId, getAttestations, getEthAddresses, getOid, createAttestation, getAttestationsByFid, getCollabs}
