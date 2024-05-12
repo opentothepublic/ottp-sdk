@@ -71,9 +71,13 @@ const getLastFetched = () : number | null => {
 }
 
 const saveLastFetched = (time: number) => {
-    writeFileSync('src/lastFetched.txt', time.toString(), 'utf8');
-    const newLastFetched = getLastFetched()
-    console.log('New last fetched: ', newLastFetched)
+    try {
+        writeFileSync('src/lastFetched.txt', time.toString(), 'utf8');
+        const newLastFetched = getLastFetched()
+        console.log('New last fetched: ', newLastFetched)
+    } catch (error) {
+        console.error(error)
+    }
 }
 
 const fetchAttestations = async (): Promise<Attestations[] | null> => {
@@ -159,7 +163,7 @@ const parseData = (jsonString: string): AttestData | null => {
         attestData.fromFID = parseInt(jsonData[0].value.value.hex, 16).toString()
         var partAttestData = JSON.parse(jsonData[1].value.value)
         attestData = { ...attestData , ...partAttestData}
-        console.log(attestData)
+        //console.log(attestData)
         return attestData;
     } catch (error) {
         console.error('Failed to parse JSON string:', error)
@@ -175,4 +179,24 @@ const getAttestations = async () => {
     } else console.log(`Nothing to fetch @ ${Date.now()}`)
 }
 
-export {parseData, getAttestations, getEthAddresses, fetchBy, AttestData, AttestationsData}
+const fetchByFID = async(fid: string): Promise<WithId<AttestationDocument>[] | null> => {
+    try {
+        await client.connect()
+        const db: Db = client.db(process.env.DB)
+        const collection = db.collection<AttestationDocument>(process.env.COLLECTION!)
+        const regex = new RegExp(fid)
+        const query1 = {"decodedAttestData.fromFID": {$regex: regex}}
+        const query2 = {"decodedAttestData.toFID": {$regex: regex}}
+        const documentsFrom = await collection.find(query1).toArray()
+        const documentsTo = await collection.find(query2).toArray()
+        
+        return [...documentsFrom, ...documentsTo]
+    } catch (e) { 
+        console.error(e)
+        return []
+    } finally {
+        await client.close()
+    }
+}
+
+export {parseData, getAttestations, getEthAddresses, fetchBy, fetchByFID, AttestData, AttestationsData}
