@@ -194,7 +194,28 @@ const createAttestation = async (account: any,  fromFid: number, data: string): 
         console.error('Error: metamask or other provider is not installed')
         throw new Error('Metamask or other provider is not installed')
     }
-    
+}
+
+const getCollabs = async(fid: string, documents: AttestationDocument[]): Promise<string[] | null> => {
+    let collabs: string[] = []
+    documents.map(document => {
+        if (document.decodedAttestData.fromFID === fid) {
+            const collab1 = document.decodedAttestData.toFID.split(',').filter(id => id.trim() !== fid && id.trim() !== '') 
+            collabs = [...collabs, ...collab1]
+            //console.log(collabs)       
+        } else {
+            let collab2 = [document.decodedAttestData.fromFID]
+            const collab3 = document.decodedAttestData.toFID.split(',').filter(id => id.trim() !== fid  && id.trim() !== '')
+            collabs = [...collabs, ...collab2, ...collab3]
+            //console.log(collabs) 
+        }        
+    })
+    //console.log('Final collab array: ', collabs)
+    //console.log(collabs.length)
+    const collaborators: string[] = Array.from(new Set(collabs))
+    //console.log(collaborators)
+    //console.log(collaborators.length)
+    return collaborators 
 }
 
 

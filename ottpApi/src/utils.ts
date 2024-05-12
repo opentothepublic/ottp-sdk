@@ -179,4 +179,24 @@ const getAttestations = async () => {
     } else console.log(`Nothing to fetch @ ${Date.now()}`)
 }
 
-export {parseData, getAttestations, getEthAddresses, fetchBy, AttestData, AttestationsData}
+const fetchByFID = async(fid: string): Promise<WithId<AttestationDocument>[] | null> => {
+    try {
+        await client.connect()
+        const db: Db = client.db(process.env.DB)
+        const collection = db.collection<AttestationDocument>(process.env.COLLECTION!)
+        const regex = new RegExp(fid)
+        const query1 = {"decodedAttestData.fromFID": {$regex: regex}}
+        const query2 = {"decodedAttestData.toFID": {$regex: regex}}
+        const documentsFrom = await collection.find(query1).toArray()
+        const documentsTo = await collection.find(query2).toArray()
+        
+        return [...documentsFrom, ...documentsTo]
+    } catch (e) { 
+        console.error(e)
+        return []
+    } finally {
+        await client.close()
+    }
+}
+
+export {parseData, getAttestations, getEthAddresses, fetchBy, fetchByFID, AttestData, AttestationsData}
