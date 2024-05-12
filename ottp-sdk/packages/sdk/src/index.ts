@@ -1,5 +1,5 @@
 import { AttestationDocument,  } from "./interface";
-import { createAttestation, getAttestations, getEthAddresses, getOid } from "./utils";
+import { createAttestation, getAttestations, getAttestationsByFid, getCollabs, getEthAddresses, getOid } from "./utils";
 
 export class OttpClient {
        
@@ -24,7 +24,12 @@ export class OttpClient {
         return tx
     }
 
-    getCollaborators = async (): Promise<void> => {}
+    getCollaborators = async (fid: string): Promise<string[]|null> => {
+        const attestations = await getAttestationsByFid(fid)
+        const collaborators = await getCollabs(fid, attestations)
+        return collaborators
+
+    }
 
     getOttpId = async (fid: number): Promise<number|null> => {
         const oid = await getOid(fid)!
