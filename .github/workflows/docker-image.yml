@@ -21,9 +21,8 @@ jobs:
       name: Authenticate with Google Cloud
       uses: google-github-actions/auth@v2      
       with:
-        token_format: 'access_token'
         service_account: 'github-actions@ecomscraper.iam.gserviceaccount.com'  
-        workload_identity_provider: 'projects/686267651726/locations/global/workloadIdentityPools/pool1/providers/aws1'
+        workload_identity_provider: 'projects/686267651726/locations/global/workloadIdentityPools/github-actions-cloud-run-pool/providers/github'
                
           
     - name: Build the Docker image
