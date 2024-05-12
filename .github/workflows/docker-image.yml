@@ -21,12 +21,12 @@ jobs:
       name: Authenticate with Google Cloud
       uses: google-github-actions/auth@v2      
       with:
-        service_account: 'rony.kris@gmail.com'  
+        service_account: 'github-actions@ecomscraper.iam.gserviceaccount.com'  
         workload_identity_provider: 'projects/686267651726/locations/global/workloadIdentityPools/github-actions-cloud-run-pool/providers/github'
 
-    - name: Login to Docker Hub
+    - name: Configure Docker Hub
       run: |-
-        gcloud auth print-access-token | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin https://asia-south1-docker.pkg.dev
+        gcloud auth configure-docker asia-south1-docker.pkg.dev
           
     - name: Build the Docker image
       run: |-
