@@ -1,10 +1,7 @@
 import { ObjectId } from "mongodb"
 
-interface OttpClientConfiguration {
-    token: string    
-}
-
 interface AttestData {
+    fromFID: string,
     toFID: string,
     message: string,
     project: string[]
@@ -23,4 +20,4 @@ interface AttestationDocument {
     decodedAttestData: AttestData;
 }
 
-export { AttestData, AttestationDocument, OttpClientConfiguration}
+export { AttestData, AttestationDocument }

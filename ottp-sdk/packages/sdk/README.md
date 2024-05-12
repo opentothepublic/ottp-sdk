@@ -43,6 +43,24 @@ const main = async () => {
 
 main()
 ```
+
+#### Get Collaborators
+
+This method fetches the collaborators for a given FID (Farcastar ID).
+
+```sh
+import { OttpClient } from '@ottp/sdk'
+
+const main = async () => {
+
+    const ottp = new OttpClient()
+    const collabs = await ottp.getCollaborators('316300')
+    console.log(collabs)
+}
+
+main()
+```
+
 #### Create Attestation
 
-Refer the example repo.
+Refer the [example](https://github.com/opentothepublic/ottp-sdk/tree/main/example) repo.

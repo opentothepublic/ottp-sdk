@@ -194,8 +194,33 @@ const createAttestation = async (account: any,  fromFid: number, data: string): 
         console.error('Error: metamask or other provider is not installed')
         throw new Error('Metamask or other provider is not installed')
     }
-    
+}
+
+const getCollabs = async(fid: string, documents: AttestationDocument[]): Promise<string[] | null> => {
+    let collabs: string[] = []
+    documents.map(document => {
+        if (document.decodedAttestData.fromFID === fid) {
+            const collab1 = document.decodedAttestData.toFID.split(',').filter(id => id.trim() !== fid && id.trim() !== '') 
+            collabs = [...collabs, ...collab1]     
+        } else {
+            let collab2 = [document.decodedAttestData.fromFID]
+            const collab3 = document.decodedAttestData.toFID.split(',').filter(id => id.trim() !== fid  && id.trim() !== '')
+            collabs = [...collabs, ...collab2, ...collab3]
+        }        
+    })
+    const collaborators: string[] = Array.from(new Set(collabs))
+    return collaborators 
+}
+
+const getAttestationsByFid = async (fid: string): Promise<AttestationDocument[]> => {
+    try {
+        const res = await axios.get(`https://ottpapi-6k6gsdlfoa-el.a.run.app/api/fetchbyfid?fid=${fid}`)
+        return res.data?.data
+    } catch (e) {
+        console.error(e)
+        return []
+    }
 }
 
 
-export {getFids, validateCollabUserInput, getTaggedData, getNewAttestId, getAttestations, getEthAddresses, getOid, createAttestation}
+export {getFids, validateCollabUserInput, getTaggedData, getNewAttestId, getAttestations, getEthAddresses, getOid, createAttestation, getAttestationsByFid, getCollabs}
