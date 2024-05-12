@@ -27,6 +27,7 @@ jobs:
     - name: Configure Docker Hub
       run: |-
         gcloud auth configure-docker asia-south1-docker.pkg.dev
+        gcloud auth login
           
     - name: Build the Docker image
       run: |-
