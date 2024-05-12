@@ -1,14 +1,26 @@
 {
   "name": "@ottp/sdk",
-  "version": "1.0.1",
-  "description": "Software Dev Kit for OTTP",
+  "version": "1.0.5",
+  "description": "Software Integration Kit for OTTP",
   "main": "dist/index.js",
   "scripts": {
     "test": "tsc -p . && ts-node src/test.ts",
     "build": "tsc -p ."
   },
+  "keywords": [
+    "OTTP",
+    "Attestation",
+    "Base",
+    "Farcastar",
+    "Collab",
+    "web3",
+    "frames",
+    "sdk",
+    "ethereum",
+    "solidity"
+  ],
   "author": "Krish",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "ts-node": "^10.9.2",
     "tsup": "^8.0.2",
