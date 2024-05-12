@@ -21,7 +21,7 @@ jobs:
       name: Authenticate with Google Cloud
       uses: google-github-actions/auth@v2      
       with:
-        service_account: 'github-actions@ecomscraper.iam.gserviceaccount.com'  
+        service_account: 'rony.kris@gmail.com'  
         workload_identity_provider: 'projects/686267651726/locations/global/workloadIdentityPools/github-actions-cloud-run-pool/providers/github'
 
     - name: Login to Docker Hub
