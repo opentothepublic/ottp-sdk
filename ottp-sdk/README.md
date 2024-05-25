@@ -14,7 +14,7 @@ npm -i @ottp/sdk
 
 #### Get Attestations
 
-This method fetches attesations made using OTTP protocol for a given FID (Farcaster ID).
+This method fetches attestations made using OTTP protocol for a given FID (Farcaster ID).
 
 ```sh
 import { OttpClient } from '@ottp/sdk'
