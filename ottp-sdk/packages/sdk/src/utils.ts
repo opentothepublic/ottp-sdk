@@ -1,7 +1,7 @@
 import axios from "axios"
 import { createPublicClient, http, createWalletClient, custom, PublicClient } from 'viem'
 import { base } from 'viem/chains'
-import { AttestationDocument } from "./interface"
+import { AtnInfo, AttestationDocument } from "./interface"
 import { abi } from "./contracts/OIDRegistryProxyAbi"
 import { easAbi } from "./contracts/easAbi"
 import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
@@ -52,16 +52,21 @@ const getFids = async(text: string): Promise<string[]> => {
     if (!text)
         throw new Error ('Fnames cannot be empty')
     try {
-        const fnames: string[] = getTaggedData(text)     
-        let fidArray: string[] = []
-        if (!fnames){
-            return fidArray
+        if(validateCollabUserInput(text)) {
+            const fnames: string[] = getTaggedData(text)     
+            let fidArray: string[] = []
+            if (!fnames){
+                return fidArray
+            } else {
+                for (let fname of fnames) {
+                    fidArray.push(await getFidFromFname(fname))
+                }            
+                return fidArray
+            }
         } else {
-            for (let fname of fnames) {
-                fidArray.push(await getFidFromFname(fname))
-            }            
-            return fidArray
+            throw new Error('Unsupported string was passed.')
         }
+        
     } catch (err) {
         throw(err)
     }
@@ -70,7 +75,10 @@ const getFids = async(text: string): Promise<string[]> => {
 const validateCollabUserInput = (text: string): boolean => {
     // Identify segments starting with '@' and possibly followed by any characters
     // except for spaces, punctuation, or special characters (excluding '@').
-    const segments = text.match(/@\w+/g) || [];
+    //const segments = text.match(/@\w+/g) || []; //This allowed only letters, numbers, and underscores within segments.
+    //const segments = text.match(/@\w+(\.\w+)*\b/g) || []; //This updated regular expression allows for segments starting with "@" followed by any combination of letters, numbers, underscores, and periods.
+    const regex = /@[a-zA-Z0-9_.-]+-?\b/g //Updated regex to allow usernames starting with @ followed by alphanumeric characters, dot, underscore or hyphen
+    const segments = text.match(regex) || [];
 
     // Validate that the original text only contains the valid segments and separators.
     // Rebuild what the valid text should look like from the segments.
@@ -78,15 +86,20 @@ const validateCollabUserInput = (text: string): boolean => {
 
     // Further process the text to remove all valid segments, leaving only separators.
     // This step checks if there are any extra characters or segments that don't start with '@'.
-    const remainingText = text.replace(/@\w+/g, '').trim();
+    //const remainingText = text.replace(/@\w+/g, '').trim();
+    //const remainingText = text.replace(/@\w+(\.\w+)*\b/g, '').trim(); // The updated regular expression will allow a dot
+    const remainingText = text.replace(regex, '').trim(); 
 
     // Check if the remaining text contains only spaces, punctuation, or special characters (excluding '@').
     // This can be adjusted based on the specific separators you expect between words.
-    const isValidSeparators = remainingText.length === 0 || /^[^@\w]+$/g.test(remainingText);
-
+    //const isValidSeparators = remainingText.length === 0 || /^[^@\w]+$/g.test(remainingText);
+    //const isValidSeparators = remainingText.length === 0 || /^[^@\w.]+$/g.test(remainingText); //It removes dot as a separater
+    const isValidSeparators = remainingText.length === 0 || /^[^@\w.-]+$/g.test(remainingText);
+    
     // Ensure every identified segment starts with '@' and contains no additional '@'.
+    //const isValidSegments = segments.every(segment => segment.startsWith('@') && !segment.slice(1).includes('@'));
     const isValidSegments = segments.every(segment => segment.startsWith('@') && !segment.slice(1).includes('@'));
-
+    
     // The text is valid if the separators are valid, and all segments start with '@' without additional '@'.
     return isValidSegments && isValidSeparators;
 }
@@ -129,8 +142,18 @@ const getEthAddresses = async (fid: string): Promise<string[]> => {
     }
 }
 
-const getAttestations = async (addr: string): Promise<AttestationDocument[]> => {
+const refreshAttestations = async () => {
     try {
+        const res = await axios.get('https://ottpapi-6k6gsdlfoa-el.a.run.app/api/fetch')
+        return res.data?.status
+    } catch (e) {
+        console.error(e)
+    }
+}
+
+const getAttestations_1 = async (addr: string): Promise<AttestationDocument[]> => {
+    try {
+        await refreshAttestations()
         const res = await axios.get(`https://ottpapi-6k6gsdlfoa-el.a.run.app/api/attestations?attester=${addr}`)
         return res.data?.data
     } catch (e) {
@@ -214,6 +237,7 @@ const getCollabs = async(fid: string, documents: AttestationDocument[]): Promise
 
 const getAttestationsByFid = async (fid: string): Promise<AttestationDocument[]> => {
     try {
+        await refreshAttestations()
         const res = await axios.get(`https://ottpapi-6k6gsdlfoa-el.a.run.app/api/fetchbyfid?fid=${fid}`)
         return res.data?.data
     } catch (e) {
@@ -222,5 +246,41 @@ const getAttestationsByFid = async (fid: string): Promise<AttestationDocument[]>
     }
 }
 
+const getUserInfo = async (fids: string): Promise<any[]|null> => {
+    try {
+        const response = await axios.get(`https://ottpapi-6k6gsdlfoa-el.a.run.app/api/userInfo?fids=${fids}`)
+        console.log(response.data)  
+        return response.data?.data
+    } catch (e) {
+        console.error(e)
+        return null
+    }
+}
 
-export {getFids, validateCollabUserInput, getTaggedData, getNewAttestId, getAttestations, getEthAddresses, getOid, createAttestation, getAttestationsByFid, getCollabs}
+const getAttestations = async(fid: string, documents: AttestationDocument[], userInfo?: boolean): Promise<AtnInfo | null> => {
+    let collabs: string[] = []
+    let attestationDetails: AtnInfo = {
+        atnMade: [],
+        atnRcvd: []
+    } 
+    documents.map(document => {        
+        if (document.decodedAttestData.fromFID === fid) {
+            attestationDetails.atnMade.push(document)
+            const collab1 = document.decodedAttestData.toFID.split(',').filter(id => id.trim() !== fid && id.trim() !== '') 
+            collabs = [...collabs, ...collab1]
+        } else {
+            attestationDetails.atnRcvd.push(document)
+            let collab2 = [document.decodedAttestData.fromFID]
+            const collab3 = document.decodedAttestData.toFID.split(',').filter(id => id.trim() !== fid  && id.trim() !== '')
+            collabs = [...collabs, ...collab2, ...collab3]
+        }        
+    })
+    const collaborators: string[] = Array.from(new Set(collabs))
+    if (userInfo) {
+        attestationDetails.userInfo = (await getUserInfo(collaborators.toString()))!
+    }
+    return attestationDetails
+}
+
+
+export {getFids, getNewAttestId, getAttestations, getEthAddresses, getOid, createAttestation, getAttestationsByFid, getCollabs}

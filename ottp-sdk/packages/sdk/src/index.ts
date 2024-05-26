@@ -1,23 +1,18 @@
-import { AttestationDocument,  } from "./interface";
-import { createAttestation, getAttestations, getAttestationsByFid, getCollabs, getEthAddresses, getOid } from "./utils";
+import { AtnInfo, AttestData, AttestationDocument,  } from "./interface";
+import { createAttestation, getAttestations, getAttestationsByFid, getCollabs, getEthAddresses, getFids, getOid } from "./utils";
 
 export class OttpClient {
        
-    getOttpAttestations = async (fid: string): Promise<AttestationDocument[] | null> => {
-        let attestations: AttestationDocument[] = [] 
-        const addrs = await getEthAddresses(fid)
-        
-        if (!addrs) return null
-        
-        for (const addr of addrs!) {
-            const attestData = await getAttestations(addr)
-            if (attestData && attestData.length > 0) {
-                attestations = attestations.concat(attestData)
-            }
+    getOttpAttestations = async (fid: string, userInfo?: boolean): Promise<AtnInfo|null> => {
+        const documents = await getAttestationsByFid(fid)
+        if (userInfo) {
+            const attestations = await getAttestations(fid, documents, true)
+            return attestations
+        } else {
+            const attestations = await getAttestations(fid, documents)
+            return attestations
         }
-        //console.log(attestations)
-        return attestations
-    }
+    } 
 
     createOttpAttestation = async (account: any, fromFid: number, data: string): Promise<`0x${string}`> => {
         const tx = await createAttestation(account, fromFid, data)
@@ -28,12 +23,16 @@ export class OttpClient {
         const attestations = await getAttestationsByFid(fid)
         const collaborators = await getCollabs(fid, attestations)
         return collaborators
-
     }
 
     getOttpId = async (fid: number): Promise<number|null> => {
         const oid = await getOid(fid)!
         return oid
     }
-}
+
+    getTaggedUserFids = async (fnames: string): Promise<string[]> => {
+        const userFids: string[] = await getFids(fnames)
+        return userFids
+    }
+}    
 

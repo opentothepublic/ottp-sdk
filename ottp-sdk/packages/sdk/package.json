@@ -1,6 +1,6 @@
 {
   "name": "@ottp/sdk",
-  "version": "1.0.5",
+  "version": "1.0.9",
   "description": "Software Integration Kit for OTTP",
   "main": "dist/index.js",
   "scripts": {
@@ -11,13 +11,14 @@
     "OTTP",
     "Attestation",
     "Base",
-    "Farcastar",
+    "Farcaster",
     "Collab",
     "web3",
     "frames",
     "sdk",
     "ethereum",
-    "solidity"
+    "solidity",
+    "opensource"
   ],
   "author": "Krish",
   "license": "MIT",

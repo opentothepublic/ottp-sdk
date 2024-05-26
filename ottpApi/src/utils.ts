@@ -1,9 +1,9 @@
 import { Db, MongoClient, WithId } from "mongodb"
 import dotenv from "dotenv"
 import axios from "axios"
-import { readFileSync, writeFileSync } from 'fs'
 import { AttestData, AttestationDocument, Attestations, AttestationsData } from './interface'
 import { insertRecords } from "./mongo"
+import { setLastFetched, getLastFetched } from "./redis"
 
 dotenv.config()
 
@@ -59,27 +59,6 @@ const fetchGqlApi = async (query: string, variables?: object): Promise<any> => {
     }
 }
 
-
-
-const getLastFetched = () : number | null => {
-    try {
-        const data = readFileSync('src/lastFetched.txt', 'utf8')
-        return data.trim().length > 0 ? Number(data) : null
-    } catch (error) {
-        return null; // Return null if file doesn't exist
-    }
-}
-
-const saveLastFetched = (time: number) => {
-    try {
-        writeFileSync('src/lastFetched.txt', time.toString(), 'utf8');
-        const newLastFetched = getLastFetched()
-        console.log('New last fetched: ', newLastFetched)
-    } catch (error) {
-        console.error(error)
-    }
-}
-
 const fetchAttestations = async (): Promise<Attestations[] | null> => {
 
     const query = `query Attestations($where: AttestationWhereInput) {
@@ -93,10 +72,11 @@ const fetchAttestations = async (): Promise<Attestations[] | null> => {
           revocationTime
           schemaId
           txid
+          refUID
         }
     }`
 
-    let lastFetched = getLastFetched()
+    let lastFetched = await getLastFetched()
     console.log('Last fetched: ',lastFetched)
 
     const variable1 = {
@@ -120,7 +100,7 @@ const fetchAttestations = async (): Promise<Attestations[] | null> => {
     const response = await fetchGqlApi(query, variables)     
     const data: Attestations[] = response.data.attestations.length > 0 ? response.data.attestations : null
     if ( data ) {
-        saveLastFetched(data[0].time)
+        await setLastFetched(data[0].time)
         return data
     } else {
         return null
@@ -141,6 +121,7 @@ const sendAttestations = async (): Promise<AttestationsData[]|null> => {
             revocationTime: attestation.revocationTime,
             schemaId: attestation.schemaId,
             txid: attestation.txid,
+            refUID: attestation.refUID,
             decodedAttestData: parseData(attestation.decodedDataJson)!
         }))
         attestationData = modAttestationData
@@ -199,4 +180,20 @@ const fetchByFID = async(fid: string): Promise<WithId<AttestationDocument>[] | n
     }
 }
 
-export {parseData, getAttestations, getEthAddresses, fetchBy, fetchByFID, AttestData, AttestationsData}
+const getUserInfo = async (fids: string): Promise<any[]|null> => {
+    const options = {
+        method: 'GET',
+        url: `https://api.neynar.com/v2/farcaster/user/bulk?fids=${fids}&viewer_fid=3`,
+        headers: {accept: 'application/json', api_key: process.env.NEYNAR_API_KEY}
+    }
+    try {
+        const response = await axios.request(options)
+        console.log(response.data)  
+        return response.data?.users
+    } catch (e) {
+        console.error(e)
+        return null
+    }
+}
+
+export {parseData, getAttestations, getEthAddresses, fetchBy, fetchByFID, getUserInfo, AttestData, AttestationsData}
