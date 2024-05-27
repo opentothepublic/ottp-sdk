@@ -48,7 +48,7 @@ const getTaggedData = (text: string): string[] => {
     return matches.map(taggedData => taggedData.substring(1));
 }
 
-const getFids = async(text: string): Promise<string[]> => {
+const getFids = async(text: string): Promise<string> => {
     if (!text)
         throw new Error ('Fnames cannot be empty')
     try {
@@ -56,12 +56,12 @@ const getFids = async(text: string): Promise<string[]> => {
             const fnames: string[] = getTaggedData(text)     
             let fidArray: string[] = []
             if (!fnames){
-                return fidArray
+                return fidArray.toString()
             } else {
                 for (let fname of fnames) {
                     fidArray.push(await getFidFromFname(fname))
                 }            
-                return fidArray
+                return fidArray.toString()
             }
         } else {
             throw new Error('Unsupported string was passed.')

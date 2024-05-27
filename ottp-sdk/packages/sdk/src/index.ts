@@ -30,8 +30,8 @@ export class OttpClient {
         return oid
     }
 
-    getTaggedUserFids = async (fnames: string): Promise<string[]> => {
-        const userFids: string[] = await getFids(fnames)
+    getTaggedUserFids = async (fnames: string): Promise<string> => {
+        const userFids: string = await getFids(fnames)
         return userFids
     }
 }    
