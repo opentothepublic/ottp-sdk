@@ -1,6 +1,6 @@
 import express from "express"
 import cors from 'cors'
-import { fetchBy, fetchByFID, getAttestations, getEthAddresses } from "./utils"
+import { fetchBy, fetchByFID, getAttestations, getEthAddresses, getFidFromFname, getUserInfo } from "./utils"
 
 const app = express()
 app.use(cors())
@@ -44,6 +44,24 @@ app.get("/api/fetchbyfid", async (req, res) => {
     const attestations = await fetchByFID(fid as string)
     console.log(`Returned ${attestations?.length} attestation records.`)
     res.send({ status: 'OK', data: attestations});
+})
+
+app.get("/api/userInfo", async (req, res) => {
+    if (!req.query.fids){
+        return res.status(400).send('FIDs not found!')
+    } 
+    const fids = req.query.fids
+    const userInfo = await getUserInfo(fids as string)
+    return res.send({ status: 'OK', data: userInfo })
+})
+
+app.get("/api/getFid", async (req, res) => {
+    if (!req.query.fname){
+        return res.status(400).send('FID not found!')
+    } 
+    const fname = req.query.fname
+    const fid = await getFidFromFname(fname as string)
+    return res.send({ status: 'OK', data: fid })
 })
 
 app.listen(port, () => console.log(`App running on port ${port}...`))

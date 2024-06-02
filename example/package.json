@@ -25,7 +25,7 @@
   "dependencies": {
     "@ethereum-attestation-service/eas-sdk": "^2.1.4",
     "@ethersproject/providers": "^5.7.2",
-    "@ottp/sdk": "file:ottp-sdk-1.0.0.tgz",
+    "@ottp/sdk": "file:ottp-sdk-1.0.10.tgz",
     "axios": "^1.6.8",
     "dotenv": "^16.4.5",
     "graphql": "^16.8.1",

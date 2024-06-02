@@ -20,4 +20,10 @@ interface AttestationDocument {
     decodedAttestData: AttestData;
 }
 
-export { AttestData, AttestationDocument }
+interface AtnInfo {
+    atnMade: AttestationDocument[]
+    atnRcvd: AttestationDocument[]
+    userInfo?: any[]
+}
+
+export { AttestData, AttestationDocument, AtnInfo }
