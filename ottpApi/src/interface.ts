@@ -16,7 +16,8 @@ interface Attestations {
     "revoked": boolean,
     "revocationTime": number,
     "schemaId": string,
-    "txid": string    
+    "txid": string,
+    "refUID": string  
 }
 
 interface AttestationsData {
@@ -28,6 +29,7 @@ interface AttestationsData {
         "revocationTime": number,
         "schemaId": string,
         "txid": string,
+        "refUID": string,
         "decodedAttestData": AttestData    
 }
 
@@ -41,6 +43,7 @@ interface AttestationDocument {
     revocationTime: number;
     schemaId: string;
     txid: string;
+    refUID: string;
     decodedAttestData: AttestData;
 }
 
