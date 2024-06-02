@@ -27,15 +27,11 @@ const getFidFromFname = async (fname: string): Promise<string> => {
     if (!fname) 
         throw new Error ('Fname cannot be empty')
     try {        
-        const response = await axios.get(`https://api.neynar.com/v2/farcaster/user/search?q=${fname}&viewer_fid=316300`, {
-            headers: {
-                accept: 'application/json',
-                api_key: process.env.NEYNAR_API_KEY,                
-            }
-        })
-        return response.data?.result.users[0].fid
+        const res = await axios.get(`https://ottpapi-6k6gsdlfoa-el.a.run.app/api/getFid?fname=${fname}`)
+        return res.data.data
     } catch (err) {
-        throw(err)
+        console.error(err)
+        return ''
     }
 }
 

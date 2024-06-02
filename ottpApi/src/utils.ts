@@ -196,4 +196,20 @@ const getUserInfo = async (fids: string): Promise<any[]|null> => {
     }
 }
 
-export {parseData, getAttestations, getEthAddresses, fetchBy, fetchByFID, getUserInfo, AttestData, AttestationsData}
+const getFidFromFname = async (fname: string): Promise<string> => { 
+    if (!fname) 
+        throw new Error ('Fname cannot be empty')
+    try {        
+        const response = await axios.get(`https://api.neynar.com/v2/farcaster/user/search?q=${fname}&viewer_fid=3`, {
+            headers: {
+                accept: 'application/json',
+                api_key: process.env.NEYNAR_API_KEY,                
+            }
+        })
+        return response.data?.result.users[0].fid
+    } catch (err) {
+        throw(err)
+    }
+}
+
+export {parseData, getAttestations, getEthAddresses, fetchBy, fetchByFID, getUserInfo, getFidFromFname, AttestData, AttestationsData}
