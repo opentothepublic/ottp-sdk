@@ -94,3 +94,9 @@ main()
 #### Create Attestation
 
 Refer the [example](https://github.com/opentothepublic/ottp-sdk/tree/main/example) repo.
+
+## Get Involved
+
+If you're interested in contributing to this open-source project, please see [CONTRIBUTING](https://github.com/opentothepublic/protocol/blob/main/CONTRIBUTING.md).
+
+*Note: Everything is a work in progress.*
